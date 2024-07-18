@@ -1,0 +1,29 @@
+# nextversion: '3.8'
+
+   services:
+     postgres-db:
+       image: postgres:latest
+       container_name: postgres-db
+       environment:
+         POSTGRES_USER: markdowncms
+         POSTGRES_PASSWORD: changeme_into_something_secure
+       ports:
+         - "5432:5432"
+       volumes:
+         - postgres_data:/var/lib/postgresql/data
+
+     node-app:
+       build: .
+       container_name: node-app
+       ports:
+         - "3000:3000"
+       environment:
+         GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+         GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+       volumes:
+         - .:/usr/src/app
+       command: npm start
+
+   volumes:
+     postgres_data:
+   

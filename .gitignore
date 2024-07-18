@@ -131,3 +131,5 @@ dist
 
 # docker
 .docker
+.env
+log.txt

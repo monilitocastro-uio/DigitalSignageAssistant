@@ -14,6 +14,17 @@ To set up the project, follow these steps:
    cd markdowncms
    ```
 
+2. Start Postgres database
+   ```bash
+   cd database
+   docker-compose up -d
+   cd ..
+   ```
+
+## NodeJS Server
+
+To start up the NodeJS Server ...
+
 ## Dependencies and Requirements
 
 Before running the project, ensure that you have the following dependencies installed:

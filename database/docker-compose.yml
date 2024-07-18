@@ -5,9 +5,10 @@ services:
     image: postgres:latest
     container_name: postgres-db
     environment:
-      POSTGRES_USER: markdowncms
+      POSTGRES_USER: markdowncmsdev
       POSTGRES_PASSWORD: changeme_into_something_secure
       POSTGRES_DB: markdowncms
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
     restart: always
       
     ports:
