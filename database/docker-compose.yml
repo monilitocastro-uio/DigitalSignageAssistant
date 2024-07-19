@@ -5,8 +5,8 @@ services:
     image: postgres:latest
     container_name: postgres-db
     environment:
-      POSTGRES_USER: markdowncmsdev
-      POSTGRES_PASSWORD: changeme_into_something_secure
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: markdowncms
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
     restart: always
