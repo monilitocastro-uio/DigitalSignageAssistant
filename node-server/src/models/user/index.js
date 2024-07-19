@@ -1,17 +1,54 @@
-const db = require('../PostgresWrapper');
+const fs = require('fs');
+const path = require('path');
+
+const userFilePath = path.join(__dirname, '../../../data/users.json');
 
 class User {
-    static async findOneByGoogleId(providerId) {
-        const result = await db.query('SELECT * FROM users WHERE provider_id = $1', [providerId]);
-        return result.rows[0];
+    static _readFile() {
+        try {
+            const data = fs.readFileSync(userFilePath, 'utf8');
+            return JSON.parse(data);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+            // If the file doesn't exist, initialize it with an empty array
+            fs.writeFileSync(userFilePath, JSON.stringify([]));
+            return [];
+            } else {
+            throw error;
+            }
+        }
     }
 
-    static async create({ providerId, name, familyName, givenName, email, photo }) {
-        const result = await db.query(
-            'INSERT INTO users (provider_id, name, family_name, given_name, email, photo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [providerId, name, familyName, givenName, email, photo]
-        );
-        return result.rows[0];
+    static _writeFile(data) {
+        fs.writeFileSync(userFilePath, JSON.stringify(data, null, 2));
+    }
+
+    static findOneByGoogleId(googleId) {
+        const users = this._readFile();
+        return users.find(user => user.googleId === googleId);
+    }
+
+    static create(userDetails) {
+        const users = this._readFile();
+        users.push(userDetails);
+        this._writeFile(users);
+        return userDetails;
+    }
+
+    static upsert(userDetails) {
+        const users = this._readFile();
+        const index = users.findIndex(user => user.googleId === userDetails.googleId);
+
+        if (index === -1) {
+            // If user does not exist, create new
+            users.push(userDetails);
+        } else {
+            // If user exists, update the user details
+            users[index] = userDetails;
+        }
+
+        this._writeFile(users);
+        return userDetails;
     }
 }
 

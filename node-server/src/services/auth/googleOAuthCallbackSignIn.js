@@ -1,12 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../../models/user'); // path to the user model 
-const PostgresWrapper = require('../../models/PostgresWrapper');
 const { loadSettings } = require('../settings/loadingSettings');
 
 async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, done) {  
     try {
-        // Connect to PostgreSQL
-        await PostgresWrapper.pool.connect();
 
         // Extract required information from profile
         const providerId = profile.id;
@@ -64,10 +61,7 @@ async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, don
     } catch (error) {
         console.error('Error during Google OAuth callback sign-up:', error);
         done(error, null);
-    } finally {
-        // Release the PostgreSQL client connection
-        await PostgresWrapper.pool.end();
-    }
+    } 
 }
 
 module.exports = {googleOAuthCallbackSignIn};
