@@ -1,0 +1,3 @@
+# will be used to configure the server
+
+allowed_emails_regex_string: "some_email_pattern_to_allow@mailinator\\.com"

@@ -1,27 +1,73 @@
+const jwt = require('jsonwebtoken');
+const User = require('../../models/user'); // path to the user model 
+const PostgresWrapper = require('../../models/PostgresWrapper');
+const { loadSettings } = require('../settings/loadingSettings');
 
-let googleOAuthCallbackSignIn = function(accessToken, refreshToken, profile, done) {
-    // Use the profile info (mainly profile id) to check if the user is registered in your db
-    // If yes, select the user and pass him to done()
-    // If not, create the user in db and pass the user to done()
-    try{
+async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, done) {  
+    try {
+        // Connect to PostgreSQL
+        await PostgresWrapper.pool.connect();
 
-        console.log('Profile:', profile);
+        // Extract required information from profile
+        const providerId = profile.id;
+        const name = profile.displayName;
+        const familyName = profile.name.familyName;
+        const givenName = profile.name.givenName;
+        const email = profile.emails[0].value;
+        const photo = profile.photos[0].value;
 
-        // Extract the profile information and put into DB
-        var providerId = profile.id;
-        var name = profile.displayName;
-        var familyName = profile.name.familyName;
-        var givenName = profile.name.givenName;
-        var email = profile.emails[0].value;
-        var photo = profile.photos[0].value;
+        // get regex string
+        const settings = loadSettings();
+        var regex = null;
+        if(settings){ 
+            regex = new RegExp(settings.allowed_emails_regex_string);
+        }
 
-        console.log('Access Token:', accessToken);
-        console.log('Refresh Token:', refreshToken);
-        return done(null, profile);
-    }catch(ex){
-        logger.error(ex);
-        return
+        if(!regex)
+        {
+            console.log('Error: No regex string found in settings');
+            done(null, null);
+            return;
+        }
+
+        // check if email is allowed
+        if(!regex.test(email))
+        {
+            console.log('Error: Email not allowed');
+            done(null, null);
+            return;
+        }
+
+        // Check if user already exists
+        let user = await User.findOneByGoogleId(providerId);
+        if (!user) {
+            // Create new user
+            user = await User.create({
+                providerId,
+                name,
+                familyName,
+                givenName,
+                email,
+                photo
+            });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.id, email: user.email },
+            process.env.APP_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // Send the JWT token as a response
+        done(null, { token, accessToken, refreshToken, profile });
+    } catch (error) {
+        console.error('Error during Google OAuth callback sign-up:', error);
+        done(error, null);
+    } finally {
+        // Release the PostgreSQL client connection
+        await PostgresWrapper.pool.end();
     }
-  }
+}
 
-  module.exports = {googleOAuthCallbackSignIn};
+module.exports = {googleOAuthCallbackSignIn};

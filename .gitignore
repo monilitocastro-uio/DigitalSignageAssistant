@@ -133,3 +133,5 @@ dist
 .docker
 .env
 log.txt
+settings.yaml
+settings.yml

@@ -9,6 +9,6 @@ const logger = winston.createLogger({
     ]
 });
 
-logger.log('info', 'Hello, Winston logging!');
+logger.info('Hello, Winston logging!');
 
 module.exports = logger;
