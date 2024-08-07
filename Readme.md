@@ -12,13 +12,12 @@ To set up the project, follow these steps:
    ```bash
    git clone https://github.com/appleisthebestfruit/markdowncms.git
    cd markdowncms
+   npm install
    ```
 
-2. Start Postgres database
+2. Start Dev
    ```bash
-   cd database
-   docker-compose up -d
-   cd ..
+   npm run dev
    ```
 
 ## NodeJS Server
