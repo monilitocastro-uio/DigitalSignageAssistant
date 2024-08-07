@@ -1,6 +1,6 @@
-# Markdown CMS
+# What it is
 
-A Google OAuth-secured Markdown Content Management System built with Obsidian for seamless and secure note-taking and document management.
+A Google OAuth-secured AI-drive Content creation system built with Vite, React, Node.js to help drive beautiful content to digital signage systems.
 
 
 ## Initial Setup
@@ -14,7 +14,15 @@ To set up the project, follow these steps:
    cd markdowncms
    ```
 
-2. Start Dev in `node-server` folder
+2. Install the web app
+
+   ```bash
+   cd DigitalSignAssistant
+   npm build
+
+   ```
+
+3. Start Dev in `node-server` folder
    ```bash
    cd node-server
    npm install
