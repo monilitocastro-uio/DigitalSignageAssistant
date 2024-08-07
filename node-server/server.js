@@ -26,10 +26,9 @@ app.use(session({ secret: process.env.APP_SECRET, resave: false, saveUninitializ
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 // ejs init
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// app.set('views', path.join(__dirname, 'views'));
 
 // AUTH ROUTES START ****************************************************   
 
@@ -76,8 +75,18 @@ app.get('/logout', (req, res) => {
 // ****************************************************** Auth Routes End
 
 
-// other routes
-app.use("/", require('./src/routes/index'));
+// // other routes
+// app.use("/", require('./src/routes/index'));
+
+// the web app
+// Serve static files from the Vite build directory
+app.use(express.static(path.join(__dirname, '../DigitalSignAssistant/dist')));
+
+// For all other routes, serve the React app's index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../DigitalSignAssistant/dist', 'index.html'));
+});
+
 
 app.listen(8181, () => {
   console.log('Server started on http://localhost:8181');

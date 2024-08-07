@@ -12,25 +12,19 @@ To set up the project, follow these steps:
    ```bash
    git clone https://github.com/appleisthebestfruit/markdowncms.git
    cd markdowncms
-   npm install
    ```
 
-2. Start Dev
+2. Start Dev in `node-server` folder
    ```bash
+   cd node-server
+   npm install
    npm run dev
    ```
 
-## NodeJS Server
+## Get Started
 
-To start up the NodeJS Server ...
-
-## Dependencies and Requirements
-
-Before running the project, ensure that you have the following dependencies installed:
-
-- [Obsidian](https://obsidian.md/)
-- [.NET Core SDK](https://dotnet.microsoft.com/download)
-- [Git](https://git-scm.com/)
+1. Build the react app
+2. Build the node server then run that server
 
 ## License
 
