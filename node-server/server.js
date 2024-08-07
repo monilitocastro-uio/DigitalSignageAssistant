@@ -79,6 +79,6 @@ app.get('/logout', (req, res) => {
 // other routes
 app.use("/", require('./src/routes/index'));
 
-app.listen(80, () => {
-  console.log('Server started on http://localhost:80');
+app.listen(8181, () => {
+  console.log('Server started on http://localhost:8181');
 });
