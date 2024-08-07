@@ -23,9 +23,9 @@ class User {
         fs.writeFileSync(userFilePath, JSON.stringify(data, null, 2));
     }
 
-    static findOneByGoogleId(googleId) {
+    static findOneByGoogleId(providerId) {
         const users = this._readFile();
-        return users.find(user => user.googleId === googleId);
+        return users.find(user => user.providerId === providerId);
     }
 
     static create(userDetails) {
@@ -37,7 +37,7 @@ class User {
 
     static upsert(userDetails) {
         const users = this._readFile();
-        const index = users.findIndex(user => user.googleId === userDetails.googleId);
+        const index = users.findIndex(user => user.providerId === userDetails.providerId);
 
         if (index === -1) {
             // If user does not exist, create new

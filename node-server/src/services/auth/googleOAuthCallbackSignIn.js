@@ -57,7 +57,7 @@ async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, don
         );
 
         // Send the JWT token as a response
-        done(null, { token, accessToken, refreshToken, profile });
+        done(null,  user);
     } catch (error) {
         console.error('Error during Google OAuth callback sign-up:', error);
         done(error, null);

@@ -5,6 +5,9 @@ const session = require('express-session');
 const logger = require('./src/log/errorLog');
 const { googleOAuthCallbackSignIn } = require('./src/services/auth/googleOAuthCallbackSignIn');
 const path = require('path');
+const httpProxy = require("express-http-proxy");
+const User = require('./src/models/user');
+const { securedRoute } = require('./src/services/auth/secureRoute');
 
 require('dotenv').config();
 
@@ -44,17 +47,23 @@ passport.use(new GoogleStrategy({
 
 // Passport Serialize
 passport.serializeUser((user, done) => {
-    done(null, user);
+    done(null, user.providerId);
 });
 
 // Passport Deserialize
-passport.deserializeUser((user, done) => {
+passport.deserializeUser((providerId, done) => {
+    var user = User.findOneByGoogleId(providerId);
     done(null, user);
 });
 
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
+
+app.get("/secure-test", securedRoute, (req, res, next)=>{ 
+  res.status(200).send("SUPER SECRET USER BENEFIT!");
+  next();
+})
 
 
 app.get(process.env.GOOGLE_CLIENT_CALLBACK_URL, 
@@ -72,22 +81,54 @@ app.get('/logout', (req, res) => {
         res.redirect('/');
     });
 });
+app.get("/me", securedRoute, (req, res, next)=>{  
+  res.json(req.user);
+  next();
+})
+
+app.post('/logout', (req, res) => {
+  // Assuming you are using passport.js for authentication
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).send('Logout error');
+    }
+
+    // Destroy the session and clear the cookie
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).send('Session destruction error');
+      }
+
+      res.clearCookie('connect.sid'); // The default cookie name for express-session
+      res.sendStatus(200); // Send a response status indicating success
+    });
+  });
+});
 // ****************************************************** Auth Routes End
 
 
-// // other routes
-// app.use("/", require('./src/routes/index'));
+// other routes
+app.use("/", require('./src/routes/index'));
 
-// the web app
-// Serve static files from the Vite build directory
-app.use(express.static(path.join(__dirname, '../DigitalSignAssistant/dist')));
+ 
 
-// For all other routes, serve the React app's index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../DigitalSignAssistant/dist', 'index.html'));
-});
+// Detect environment
+const isDevelopment = process.env.NODE_ENV === 'development';
 
+// Serve static files or proxy to Vite in development
+if (isDevelopment) {
+    const VITE_DEV_SERVER_URL = 'http://localhost:5173';
+    app.use('/', httpProxy(VITE_DEV_SERVER_URL));
+} else {
+    // Serve static files from the build directory
+    app.use(express.static(path.join(__dirname, '../DigitalSignAssistant/dist')));
 
+    // For all other routes, serve the React app's index.html
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../DigitalSignAssistant/dist', 'index.html'));
+    });
+}
+ 
 app.listen(8181, () => {
   console.log('Server started on http://localhost:8181');
 });
