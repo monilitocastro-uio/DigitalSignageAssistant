@@ -14,6 +14,10 @@ To set up the project, follow these steps:
    cd markdowncms
    ```
 
+2. Secrets and Configs
+
+Make sure to `mv .env.example .env` and fill in the necessary secrets from third-party APIs into the `.env` file. You must also `mv settings.yml.example settings.yml` and apply the allowed emails (as regex string) into the yml file.
+
 2. Install the web app
 
    ```bash

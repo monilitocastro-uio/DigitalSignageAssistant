@@ -29,8 +29,6 @@ app.use(session({ secret: process.env.APP_SECRET, resave: false, saveUninitializ
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ejs init
-app.set('view engine', 'ejs');
 // app.set('views', path.join(__dirname, 'views'));
 
 // AUTH ROUTES START ****************************************************   
@@ -45,6 +43,13 @@ passport.use(new GoogleStrategy({
   googleOAuthCallbackSignIn
 ));
 
+app.get("/error/signin", (req,res)=>{
+  
+  return res.status(401).render('error/signin', { title: 'Sign In Error' }); 
+})
+
+
+
 // Passport Serialize
 passport.serializeUser((user, done) => {
     done(null, user.providerId);
@@ -55,7 +60,7 @@ passport.deserializeUser((providerId, done) => {
     var user = User.findOneByGoogleId(providerId);
     done(null, user);
 });
-
+ 
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
@@ -70,7 +75,7 @@ app.get(process.env.GOOGLE_CLIENT_CALLBACK_URL,
     passport.authenticate('google', { failureRedirect: '/error/signin' }),
     (req, res, next) => {
       // Successful authentication, redirect home. 
-      res.redirect('/');
+      res.redirect('/dashboard');
       next();
     }
 );
@@ -129,6 +134,10 @@ if (isDevelopment) {
     });
 }
  
+// ejs init
+app.set('view engine', 'ejs');
+
+
 app.listen(8181, () => {
   console.log('Server started on http://localhost:8181');
 });

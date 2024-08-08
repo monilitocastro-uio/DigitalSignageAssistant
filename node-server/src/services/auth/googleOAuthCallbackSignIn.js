@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/user'); // path to the user model 
 const { loadSettings } = require('../settings/loadingSettings');
 
-async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, done) {  
+async function googleOAuthCallbackSignIn( accessToken, refreshToken, profile, done) {  
     try {
 
         // Extract required information from profile
@@ -23,14 +23,13 @@ async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, don
         if(!regex)
         {
             console.log('Error: No regex string found in settings');
-            done(null, null);
+            done("Server error.", null);
             return;
         }
 
         // check if email is allowed
         if(!regex.test(email))
-        {
-            console.log('Error: Email not allowed');
+        {  
             done(null, null);
             return;
         }
@@ -60,7 +59,7 @@ async function googleOAuthCallbackSignIn(accessToken, refreshToken, profile, don
         done(null,  user);
     } catch (error) {
         console.error('Error during Google OAuth callback sign-up:', error);
-        done(error, null);
+        done("Google OAuth Error.", null);
     } 
 }
 
