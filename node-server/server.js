@@ -1,15 +1,55 @@
-const express = require('express');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const session = require('express-session');
-const logger = require('./src/log/errorLog');
-const { googleOAuthCallbackSignIn } = require('./src/services/auth/googleOAuthCallbackSignIn');
-const path = require('path');
-const httpProxy = require("express-http-proxy");
-const User = require('./src/models/user');
-const { securedRoute } = require('./src/services/auth/secureRoute');
+import express from 'express';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import session from 'express-session';
+import logger from './src/log/errorLog.js';
+import { googleOAuthCallbackSignIn } from './src/services/auth/googleOAuthCallbackSignIn.js';
+import path, { dirname } from 'path';
+import httpProxy from 'express-http-proxy'; 
+import { securedRoute } from './src/services/auth/secureRoute.js';
+import multer from 'multer';
+import fs from 'fs'; 
+import { User } from './src/models/user/index.js';
+import indexRouter from './src/routes/index.js'; // Ensure you have the .js extension
 
-require('dotenv').config();
+
+import { config } from 'dotenv';
+import { VectorEmbedService } from './src/services/embeddings/index.js';
+import { fileURLToPath } from 'url';
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+config();
+
+var docCache = {}
+
+
+// Set up Multer storage with dynamic destination based on user email
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const userEmail = req?.user?.email;
+    if(!userEmail)
+    {
+      cb("User email not defined.", null);
+      return;
+    }
+    const userDir = `./data/uploads/${userEmail}`;
+
+    // Ensure the directory exists
+    fs.mkdirSync(userDir, { recursive: true });
+
+    cb(null, userDir);
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null, 
+      file.originalname
+    );
+  },
+});
+const upload = multer({ storage: storage });
 
 const app = express();
  
@@ -87,11 +127,17 @@ app.get('/logout', (req, res) => {
     });
 });
 app.get("/me", securedRoute, (req, res, next)=>{  
-  res.json(req.user);
+  res.json(req?.user);
   next();
 })
 
 app.post('/logout', (req, res) => {
+
+  var email = req?.user?.email;
+  if(email){
+    docCache[email] = null;
+  }
+
   // Assuming you are using passport.js for authentication
   req.logout((err) => {
     if (err) {
@@ -111,11 +157,95 @@ app.post('/logout', (req, res) => {
 });
 // ****************************************************** Auth Routes End
 
+// Handle file upload route
+app.post('/upload', upload.single('file'), (req, res) => { 
+  if (!req.file) {
+    
+    return res.status(400).send('No file uploaded.');
+  }
+
+  res.send({
+    message: 'File uploaded successfully',
+    file: req.file,
+  });
+  var email = req?.user?.email;
+  if(email){
+    docCache[email] = new VectorEmbedService(email);
+    docCache[email].buildDocsAsync();
+  }
+});
+app.get("/upload", securedRoute, (req,res)=>{
+  var email = req?.user?.email;
+  if(email)
+  {
+    var loaded = docCache[email]?.loaded;
+    var count = docCache[email]?.count;
+    res.status(200).sendJson({loaded, count})
+  }else{
+    res.status(404).send("Not found.");
+  }
+})
 
 // other routes
-app.use("/", require('./src/routes/index'));
+app.use("/", indexRouter);
 
- 
+app.get('/files', (req, res) => {
+  const userEmail = req?.user?.email; // Assuming req.user contains authenticated user's info
+  if(!userEmail)
+  {
+    res.status(500).send("Server error.");
+    return;
+  }
+  const userDir = path.join(__dirname, "data",'uploads', userEmail);
+
+  fs.readdir(userDir, (err, files) => {
+    if (err) {
+      console.error('Could not read directory', err);
+      return res.status(500).json({ error: 'Could not read user directory' });
+    }
+
+
+    res.json(files);
+  });
+});
+
+app.delete('/files/:fileName', (req, res) => {
+  try{
+
+      if(!req?.user?.email){
+        res.status(401).send("Bad Request.")
+        return;
+      }
+      const decodedFileName = decodeURIComponent(req.params.fileName);
+    
+      const userEmail = req?.user?.email; 
+      if(!userEmail)
+      {
+        res.status(500).send("Server Error.");
+        return;
+      }
+    
+      const filePath = path.join(__dirname, 'data/uploads', userEmail, decodedFileName);
+    
+      fs.unlink(filePath, (err) => {
+          if (err) {
+              console.error(`Error deleting file ${filePath}:`, err);
+              return res.status(500).send('Internal Server Error');
+          }
+          docCache[userEmail] = new VectorEmbedService(userEmail);
+          res.status(200).send('File deleted successfully');
+          docCache[userEmail].buildDocsAsync();
+          return;
+      });
+    
+      
+  }catch(ex){
+    logger.log("error delete /files/:filename", ex); 
+  }
+
+  
+});
+
 
 // Detect environment
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -141,3 +271,25 @@ app.set('view engine', 'ejs');
 app.listen(8181, () => {
   console.log('Server started on http://localhost:8181');
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

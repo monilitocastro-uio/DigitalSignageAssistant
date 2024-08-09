@@ -1,8 +1,9 @@
-const jwt = require('jsonwebtoken');
-const User = require('../../models/user'); // path to the user model 
-const { loadSettings } = require('../settings/loadingSettings');
+import jwt from 'jsonwebtoken'; 
+import { loadSettings } from '../settings/loadingSettings.js';
+import { User } from '../../models/user/index.js';
 
-async function googleOAuthCallbackSignIn( accessToken, refreshToken, profile, done) {  
+
+export async function googleOAuthCallbackSignIn( accessToken, refreshToken, profile, done) {  
     try {
 
         // Extract required information from profile
@@ -62,5 +63,4 @@ async function googleOAuthCallbackSignIn( accessToken, refreshToken, profile, do
         done("Google OAuth Error.", null);
     } 
 }
-
-module.exports = {googleOAuthCallbackSignIn};
+ 

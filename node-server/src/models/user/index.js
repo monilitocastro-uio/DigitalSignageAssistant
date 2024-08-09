@@ -1,9 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path, {dirname} from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const userFilePath = path.join(__dirname, '../../../data/users.json');
 
-class User {
+export class User {
     static _readFile() {
         try {
             const data = fs.readFileSync(userFilePath, 'utf8');
@@ -51,5 +54,3 @@ class User {
         return userDetails;
     }
 }
-
-module.exports = User;

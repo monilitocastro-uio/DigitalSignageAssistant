@@ -136,3 +136,4 @@ log.txt
 settings.yaml
 settings.yml
 users.json
+node-server/data/uploads/**/**

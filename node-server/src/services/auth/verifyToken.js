@@ -1,6 +1,7 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-function verifyToken(req, res, next) {
+
+export function verifyToken(req, res, next) {
     const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Bearer <token>
 
     if (!token) {
@@ -15,5 +16,4 @@ function verifyToken(req, res, next) {
         res.status(400).json({ message: 'Invalid token.' });
     }
 }
-
-module.exports = {verifyToken};
+ 

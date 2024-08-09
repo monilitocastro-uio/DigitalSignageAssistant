@@ -1,4 +1,4 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
 
 // Home Route
@@ -7,9 +7,4 @@ router.get('/', (req, res) => {
     res.render('index', { title:"Home", message: "Welcome!!!!" });
 });
 
-// // Protected Resource Route
-// router.get('/protected-resource', verifyToken, (req, res) => {
-//     res.json({ message: 'Welcome to the protected resource!', user: req.user });
-// });
-
-module.exports = router;
+export default router;

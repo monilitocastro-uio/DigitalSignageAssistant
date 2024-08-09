@@ -1,9 +1,10 @@
-const fs = require('fs');
-const yaml = require('yaml');
+import fs from 'fs';
+import yaml from 'yaml';
+
 
 var settings_ = null;
 
-function loadSettings() {
+export function loadSettings() {
     if (settings_) {
         return settings_;
     }
@@ -13,5 +14,4 @@ function loadSettings() {
     return settings;
 }
  
-
-module.exports = { loadSettings };
+ 
