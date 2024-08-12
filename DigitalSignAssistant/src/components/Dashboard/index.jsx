@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { DigitalSignage } from "../../layouts/DigitalSignage";
 import axios from 'axios';
 import { FileList } from "../FileList";
+import { ChatTextArea } from "./styles";
+import {ChatForm} from "../ChatForm";
 
 
 export const Dashboard = props =>
@@ -11,8 +13,16 @@ export const Dashboard = props =>
    // TODO: trigger status polling and give to FileUploadTarget. this function should update progress until progress is 100% and then it should put progress back to 0;
     
     return (
-       <><DigitalSignage progress={progress} fileUpload={()=><><FileUploadTarget/></>} /></>
+       <><DigitalSignage 
+          progress={progress} 
+          chat={()=><><ChatInput /></>}
+          fileUpload={()=><><FileUploadTarget/></>} />
+        </>
     );
+}
+
+const ChatInput = ()=> {
+  return <ChatForm />
 }
 
 

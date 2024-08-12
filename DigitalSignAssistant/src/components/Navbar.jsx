@@ -10,6 +10,8 @@ const NavbarWrapper = styled.nav`
   justify-content: space-between; 
   background-color: #f8f9fa; 
   height: 3.5rem;
+  width: 100%;
+  position: absolute;
 `;
  
 

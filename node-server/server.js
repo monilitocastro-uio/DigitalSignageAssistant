@@ -25,6 +25,8 @@ config();
 
 var docCache = {}
 
+var chatCache = {};
+
 
 // Set up Multer storage with dynamic destination based on user email
 const storage = multer.diskStorage({
